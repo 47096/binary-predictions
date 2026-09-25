@@ -61,7 +61,7 @@ Three binary jobs, one family of model:
 | File | Data | Target | Focus |
 |------|------|--------|--------|
 | `01-income-glm.R` | Adult / census (`data/adult.csv`) | income >50K | GLM, VIF, odds, holdout confusion |
-| `03-diabetes-glucose.R` | `mlbench::PimaIndiansDiabetes2` | diabetes | Glucose-only then full GLM + probability |
+| `03-diabetes-glucose.R` | `mlbench::PimaIndiansDiabetes2` | diabetes | Glucose→full GLM · confusions · recall/precision/F1/AUC |
 
 ### Probability ↔ odds ↔ log-odds
 

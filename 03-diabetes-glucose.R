@@ -60,3 +60,27 @@ mean(preds$predicted.classes == preds$diabetes)
 cmat <- conf_mat(preds, truth = diabetes, estimate = predicted.classes)
 cmat
 summary(cmat)
+
+# --- Full metrics suite (merged from ml-with-r) -----------------------------
+library(pROC)
+
+prob_test <- predict(glm.model.2, test.data, type = "response")
+pred_test <- factor(ifelse(prob_test > 0.5, "pos", "neg"), levels = levels(test.data$diabetes))
+
+# caret panel: accuracy, kappa, sens, spec, pos/neg pred value
+print(caret::confusionMatrix(pred_test, test.data$diabetes))
+
+# Explicit business metrics on the positive class ("pos" = diabetes)
+TP <- sum(pred_test == "pos" & test.data$diabetes == "pos")
+FP <- sum(pred_test == "pos" & test.data$diabetes == "neg")
+TN <- sum(pred_test == "neg" & test.data$diabetes == "neg")
+FN <- sum(pred_test == "neg" & test.data$diabetes == "pos")
+
+accuracy  <- (TP + TN) / (TP + TN + FP + FN)
+recall    <- TP / (TP + FN)          # catch cases (medical priority)
+precision <- TP / (TP + FP)
+f1        <- 2 * precision * recall / (precision + recall)
+auc_value <- as.numeric(pROC::auc(test.data$diabetes, prob_test))
+
+cat(sprintf("Accuracy  = %.3f\nRecall    = %.3f\nPrecision = %.3f\nF1        = %.3f\nAUC       = %.3f\n",
+            accuracy, recall, precision, f1, auc_value))
