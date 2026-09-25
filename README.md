@@ -60,9 +60,8 @@ Three binary jobs, one family of model:
 
 | File | Data | Target | Focus |
 |------|------|--------|--------|
-| `01-income-glm.R` | Adult / census income (local `data/adult.csv`) | income >50K | EDA, features, GLM + interpret |
-| `02-income-tidymodels.R` | Same table | income >50K | tidymodels path, vip |
-| `03-diabetes-glucose.R` | `mlbench::PimaIndiansDiabetes2` | diabetes | Single-feature GLM + probability |
+| `01-income-glm.R` | Adult / census (`data/adult.csv`) | income >50K | GLM, VIF, odds, holdout confusion |
+| `03-diabetes-glucose.R` | `mlbench::PimaIndiansDiabetes2` | diabetes | Glucose-only then full GLM + probability |
 
 ### Probability ↔ odds ↔ log-odds
 
