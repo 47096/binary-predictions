@@ -1,109 +1,108 @@
-# Logistic Regression in R
+# Will they say yes — or is this high risk?
 
-Three datasets, three problems, one algorithm — predicting income, diabetes, and churn using logistic regression with base R, caret, and tidymodels.
+**Binary prediction case study — income and health risk.**
 
-## Problem
+Most business questions that matter are **yes / no**: will they earn above the threshold, will they develop the condition, will they leave (same maths). I help teams turn messy profiles into **probabilities people can act on** — and explain the odds in language a stakeholder can defend.
 
-Logistic regression is the backbone of binary classification. But the gap between "fit a model" and "understand what it's telling you" is where most practitioners get stuck. This project works through three real datasets to show the full picture: data prep, model building, coefficient interpretation, probability calculation, and evaluation.
+---
 
-## What's Inside
+## The stake
 
-| Script | Dataset | Target | Rows | What It Covers |
-|--------|---------|--------|------|---------------|
-| `adult - logistic regression.R` | Census Income | Income >50K | 48,842 | Full EDA, feature engineering, multiple model iterations, GLM + tidymodels |
-| `churn - logistic regression.R` | Census Income | Income >50K | 48,842 | Alternative approach with different feature engineering |
-| `diabetes - logistic regression.R` | Pima Indians | Diabetes pos/neg | 392 | Single-variable model, manual probability calculation, visualisation |
-| `calculate probability.R` | — | — | — | Probability ↔ odds ↔ log-odds conversions |
+A label without a probability is a blunt instrument. Leaders need **who is likely** and **what moves that likelihood** — not a black-box yes. The same log-odds story runs through credit, health risk, churn, and eligibility.
 
-## Results
+## The story
 
-### Diabetes (Single Variable — Glucose Only)
+Three binary jobs, one family of model:
 
-| Metric | Value |
-|--------|-------|
-| Intercept | -6.159 |
-| Glucose coefficient | 0.043 |
-| A glucose of 180 → P(diabetes) | 83.6% |
-| A glucose of 20 → P(diabetes) | 0.5% |
+| Question | What we predict |
+|----------|-----------------|
+| **Income** | Above $50K vs not — from age, education, hours, … |
+| **Health risk** | Diabetes vs not — starting with glucose |
+| **The maths** | Probability ↔ odds ↔ log-odds (so the model is explainable) |
 
-### Adult Income (Full Model)
+**Outcome on this build:**
+- Full **GLM + tidymodels** paths on a 48K-row income table  
+- **Coefficient reading** (education, age, hours — including uncomfortable real-world signals)  
+- **Diabetes**: a single feature already yields useful risk scores (e.g. high glucose → high probability)  
+- Probability conversions your analysts can put in a memo  
 
-The adult dataset includes 48K rows with features like age, workclass, education, marital status, race, gender, and hours per week. The model predicts whether income exceeds $50K.
+> **The commercial idea:** ship **risk scores + reason codes**, not just a classification label.
 
-Key features:
-- **education.num** — strongest predictor (higher education → higher income)
-- **age** — positive relationship with income
-- **hours.per.week** — more hours = more likely to earn >50K
-- **gender** — significant coefficient (reflecting wage gap in the data)
+---
 
-## How Logistic Regression Works
+## What that looks like in your world
 
-**Linear model** → **sigmoid function** → **probability**:
+| You have | I turn it into |
+|----------|----------------|
+| Customer / patient / applicant rows | **Probability** of the yes |
+| “Flag the high risk ones” | Threshold you choose + **who sits above it** |
+| Coefficients nobody reads | **Odds story** in business language |
+| Three tools, three scorecards | One honest binary playbook |
+
+**Typical engagement:** define the yes/no and the cost of mistakes → fit on your data → calibrated scores + top drivers.
+
+**[Talk to me about risk scoring →](https://datafying.co/#contactus)** · [datafying](https://datafying.co/)
+
+---
+
+## Why leaders bring me in
+
+- Binary problems are everywhere — this is the **workhorse**, not a toy  
+- Coefficients are turned into **odds you can argue with**  
+- Shows the full loop: EDA → model → interpretation → probability maths  
+- Honest about fairness and proxy variables in demographic data  
+
+---
+
+## Proof of craft *(technical)*
+
+### Scripts
+
+| File | Data | Target | Focus |
+|------|------|--------|--------|
+| `01-income-glm.R` | Adult / census income (local `data/adult.csv`) | income >50K | EDA, features, GLM + interpret |
+| `02-income-tidymodels.R` | Same table | income >50K | tidymodels path, vip |
+| `03-diabetes-glucose.R` | `mlbench::PimaIndiansDiabetes2` | diabetes | Single-feature GLM + probability |
+
+### Probability ↔ odds ↔ log-odds
 
 ```
-log-odds = β₀ + β₁x₁ + β₂x₂ + ...
-probability = exp(log-odds) / (1 + exp(log-odds))
+odds     = p / (1 - p)
+log-odds = log(odds)
+p        = exp(log-odds) / (1 + exp(log-odds))
 ```
 
-### Probability ↔ Odds ↔ Log-Odds
+Example (diabetes / glucose): coefficient `0.043` → each glucose unit multiplies odds by `exp(0.043) ≈ 1.044`; a 10-unit rise ≈ **1.54× odds**.
 
-| Probability | Odds | Log-Odds |
-|------------|------|----------|
-| 0.25 | 0.333 | -1.099 |
-| 0.50 | 1.000 | 0.000 |
-| 0.75 | 3.000 | 1.099 |
+### Limits (honesty)
+- Adult data includes sensitive attributes — **fairness review required** in production  
+- Naive row deletes on missing data (diabetes demo) are for teaching clarity  
+- Correlation in coefficients ≠ intervention effect  
+- Recalibrate when population shifts  
 
-```r
-# probability → odds
-odds <- p / (1 - p)
+---
 
-# odds → log-odds
-log_odds <- log(odds)
-
-# log-odds → probability
-p <- exp(log_odds) / (1 + exp(log_odds))
-```
-
-### Interpreting Coefficients
-
-A coefficient of 0.043 for glucose means:
-- Each unit increase in glucose → odds multiply by exp(0.043) = 1.044
-- A 10-unit increase → odds multiply by exp(0.43) = 1.54 (54% higher odds)
-
-## Setup
+## Reproduce
 
 ```bash
-git clone https://github.com/wsamuelw/logistic-regression-in-r.git
-cd logistic-regression-in-r
+git clone https://github.com/47096/binary-predictions.git
+cd binary-predictions
 ```
 
 ```r
-install.packages(c("tidyverse", "tidymodels", "caret", "vip", "car", "naniar", "mlbench"))
-source("diabetes - logistic regression.R")
+source("setup.R")
+source("01-income-glm.R")
+source("03-diabetes-glucose.R")
 ```
 
-## Data Sources
+**Data:** `data/adult.csv` (UCI Adult, vendored) · `PimaIndiansDiabetes2` via `mlbench`
 
-| Dataset | Source | Description |
-|---------|--------|-------------|
-| Census Income / Adult | [UCI ML Repository](https://archive.ics.uci.edu/ml/datasets/Adult) | Predict income from demographics |
-| Pima Indians Diabetes | `mlbench::PimaIndiansDiabetes2` | Predict diabetes from medical indicators |
+**Stack:** `tidyverse` · `tidymodels` · `caret` · `glm` · `vip` · `mlbench` · `naniar`
 
-## Tech Stack
+---
 
-- **base R** — `glm()` for logistic regression
-- **tidymodels** — modern modelling workflow
-- **caret** — train/test splitting and evaluation
-- **vip** — variable importance plots
-- **naniar** — missing data visualisation
-- **car** — diagnostic plots
+## Next step
 
-## References
+If you have a yes/no decision and only hard labels today — that is the engagement I run.
 
-- [GLM documentation](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/glm.html)
-- [Interpreting logistic regression coefficients](https://www.displayr.com/how-to-interpret-logistic-regression-coefficients/)
-- [R Generalized Linear Model](https://www.guru99.com/r-generalized-linear-model.html)
-
-## License
-
-MIT
+**[Book a conversation →](https://datafying.co/#contactus)** · Customer & risk analytics · [datafying](https://datafying.co/)

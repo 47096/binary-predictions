@@ -6,7 +6,7 @@ library(caret)
 library(car)
 
 # load data ####
-data_adult <-read.csv("https://raw.githubusercontent.com/guru99-edu/R-Programming/master/adult.csv", stringsAsFactors = T)
+data_adult <-read.csv("data/adult.csv", stringsAsFactors = T)
 
 glimpse(data_adult)
 
